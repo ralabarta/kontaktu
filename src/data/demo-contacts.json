@@ -1,0 +1,407 @@
+{
+  "is_test": true,
+  "description": "Synthetic public test fixture. No record represents a real person.",
+  "contacts": [
+    {
+      "is_test": true,
+      "id": "demo-contact-01",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Aina Ficticia Compradora",
+      "phone": "+34 100 00 00 01",
+      "email": "aina.compradora@example.invalid",
+      "lead_source": "VOICE_CALL",
+      "created_at": "2026-07-08T10:28:00Z",
+      "notes": "Perfil sintético para pruebas de compra.",
+      "qualification_data": {
+        "qualification": {
+          "sale": {
+            "budget": {
+              "value": 420000,
+              "source": "explicit",
+              "updatedAt": "2026-07-08T10:40:00Z"
+            },
+            "preferred_area": {
+              "value": ["Distrito Inventado", "Barrio Simulado"],
+              "source": "explicit",
+              "updatedAt": "2026-07-08T10:40:00Z"
+            },
+            "bedrooms": {
+              "value": 3,
+              "source": "inferred",
+              "updatedAt": "2026-07-08T10:40:00Z"
+            },
+            "financing": {
+              "value": { "status": "preapproved", "percentage": 70 },
+              "source": "inferred",
+              "updatedAt": "2026-07-08T10:40:00Z"
+            }
+          },
+          "shared": {
+            "move_in_flexible": {
+              "value": true,
+              "source": "explicit",
+              "updatedAt": "2026-07-08T10:40:00Z"
+            }
+          }
+        }
+      },
+      "interactions": [
+        {
+          "id": "demo-interaction-01-a",
+          "channel": "VOICE",
+          "direction": "inbound",
+          "created_at": "08/07/2026 10:30",
+          "content": "Busca una vivienda ficticia luminosa con tres dormitorios.",
+          "metadata": {
+            "duration_sec": 184,
+            "transcript_excerpt": "Esta transcripción es completamente sintética y sirve para probar el desplegable."
+          }
+        },
+        {
+          "id": "demo-interaction-01-b",
+          "channel": "WHATSAPP",
+          "direction": "inbound",
+          "created_at": "2026-07-09T08:00:00Z",
+          "content": "Confirma que puede visitar una propiedad de demostración."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-02",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Aina Ficticia Duplicada",
+      "phone": "100000001",
+      "email": "aina.duplicada@example.invalid",
+      "lead_source": "MANUAL",
+      "created_at": "09/07/2026",
+      "qualification_data": null,
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-03",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Bruno Simulado Inquilino",
+      "phone": "+34 100 00 00 03",
+      "email": "bruno.inquilino@example.invalid",
+      "lead_source": "WHATSAPP",
+      "created_at": 1783526400,
+      "qualification_data": "{\"qualification\":{\"rental\":{\"monthly_budget\":{\"value\":1450,\"source\":\"explicit\",\"updatedAt\":\"2026-07-10T09:45:00Z\"},\"pets\":{\"value\":true,\"source\":\"explicit\",\"updatedAt\":\"2026-07-10T09:45:00Z\"}}}}",
+      "interactions": [
+        {
+          "id": "demo-interaction-03-a",
+          "channel": "WHATSAPP",
+          "direction": "inbound",
+          "created_at": "2026-07-10T09:45:00Z",
+          "content": "Pregunta por un alquiler sintético que admita mascota."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-04",
+      "organization_id": "ORG-DEMO",
+      "full_name": null,
+      "phone": null,
+      "email": null,
+      "lead_source": null,
+      "created_at": null,
+      "qualification_data": null,
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-05",
+      "organization_id": "ORG-DEMO",
+      "full_name": null,
+      "phone": null,
+      "email": "formulario.web@example.invalid",
+      "lead_source": "WEB_FORM",
+      "created_at": "2026-07-11T12:00:00Z",
+      "qualification_data": {
+        "qualification": {
+          "shared": {
+            "free_text_need": {
+              "value": "Vivienda ficticia cerca de un parque",
+              "source": "customer",
+              "updatedAt": "2026-07-11T12:00:00Z"
+            }
+          }
+        }
+      },
+      "interactions": [
+        {
+          "id": "demo-interaction-05-a",
+          "channel": "WEB_FORM",
+          "direction": "inbound",
+          "created_at": "11/07/2026 12:00",
+          "content": "Formulario sintético recibido correctamente."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-06",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Celia Email Inválido",
+      "phone": "+34 100 00 00 06",
+      "email": "correo-invalido",
+      "lead_source": "META_LEAD_ADS",
+      "created_at": "2026-07-12T09:00:00Z",
+      "qualification_data": null,
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-07",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Dora Caso Cumplimiento",
+      "phone": "+34 100 00 00 07",
+      "email": "dora.cumplimiento@example.invalid",
+      "lead_source": "CRM",
+      "created_at": "2026-07-13T13:00:00Z",
+      "tags": ["no-llamar", "seguimiento-humano"],
+      "ai_handoff": true,
+      "handoff_reason": "Solicita que una persona revise el caso sintético.",
+      "handoff_requested_at": "2026-07-14T08:30:00Z",
+      "qualification_data": {
+        "qualification": {
+          "shared": {
+            "preferred_contact_channel": {
+              "value": "email",
+              "source": "manual",
+              "updatedAt": "2026-07-14T08:35:00Z"
+            }
+          }
+        }
+      },
+      "interactions": [
+        {
+          "id": "demo-interaction-07-a",
+          "channel": "EMAIL",
+          "direction": "outbound",
+          "created_at": "2026-07-14T08:00:00Z",
+          "content": "Mensaje sintético de seguimiento por correo."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-08",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Eloy Canal Email",
+      "phone": null,
+      "email": "eloy.email@example.invalid",
+      "lead_source": "WEBSITE",
+      "created_at": "2026-07-15T11:00:00Z",
+      "qualification_data": null,
+      "interactions": [
+        {
+          "id": "demo-interaction-08-a",
+          "channel": "EMAIL",
+          "direction": "inbound",
+          "created_at": "2026-07-15T11:15:00Z",
+          "content": "Canal email sintético reconocido."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-09",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Fara Canal Desconocido",
+      "phone": "+34 100 00 00 09",
+      "email": null,
+      "lead_source": "PARTNER_PORTAL",
+      "created_at": "2026-07-16T10:00:00Z",
+      "qualification_data": null,
+      "interactions": [
+        {
+          "id": "demo-interaction-09-a",
+          "channel": "CARRIER_PIGEON",
+          "direction": "sideways",
+          "created_at": "fecha-invalida",
+          "content": "Interacción sintética de canal no reconocido."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-10",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Gael Precedencia Manual",
+      "phone": "+34 100 00 00 10",
+      "email": "gael.precedencia@example.invalid",
+      "lead_source": "VOICE",
+      "created_at": "2026-07-17T10:00:00Z",
+      "qualification_data": {
+        "qualification": {
+          "sale": {
+            "budget": [
+              {
+                "value": 300000,
+                "source": "explicit",
+                "updatedAt": "2026-07-17T10:15:00Z",
+                "sourceRef": "demo-call-10"
+              },
+              {
+                "value": 335000,
+                "source": "manual",
+                "updatedAt": "2026-07-18T08:00:00Z",
+                "sourceRef": "demo-agent-edit-10"
+              }
+            ]
+          }
+        }
+      },
+      "interactions": [
+        {
+          "id": "demo-interaction-10-a",
+          "channel": "VOICE",
+          "direction": "inbound",
+          "created_at": "2026-07-17T10:15:00Z",
+          "content": "Indica primero un presupuesto sintético inferior."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-11",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Hugo Valores Mixtos",
+      "phone": "+34 100 00 00 11",
+      "email": "hugo.valores@example.invalid",
+      "lead_source": "WITEI",
+      "created_at": "2026-07-18T09:00:00Z",
+      "qualification_data": {
+        "qualification": {
+          "sale": {
+            "custom_unknown_key": {
+              "value": { "level": 2, "labels": ["alpha", "beta"] },
+              "source": "ai",
+              "updatedAt": "2026-07-18T09:30:00Z"
+            }
+          },
+          "rental": {
+            "guarantor": {
+              "value": false,
+              "source": "customer",
+              "updatedAt": "2026-07-18T09:30:00Z"
+            }
+          },
+          "shared": {
+            "occupants": {
+              "value": 2,
+              "source": "customer",
+              "updatedAt": "2026-07-18T09:30:00Z"
+            },
+            "details_pending": {
+              "value": null,
+              "source": "unknown",
+              "updatedAt": null
+            }
+          }
+        }
+      },
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-12",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Iria Cualificación Nula",
+      "phone": "+34 100 00 00 12",
+      "email": null,
+      "lead_source": "MANUAL",
+      "created_at": "2026-07-19T09:00:00Z",
+      "qualification_data": null,
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-13",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Jano Sin Interacciones",
+      "phone": "+34 100 00 00 13",
+      "email": "jano.vacio@example.invalid",
+      "lead_source": "CRM",
+      "created_at": "2026-07-20T09:00:00Z",
+      "qualification_data": {
+        "qualification": {
+          "shared": {
+            "language": {
+              "value": "es",
+              "source": "manual",
+              "updatedAt": "2026-07-20T09:00:00Z"
+            }
+          }
+        }
+      },
+      "interactions": []
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-14",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Kira Traspaso Humano",
+      "phone": "+34 100 00 00 14",
+      "email": "kira.traspaso@example.invalid",
+      "lead_source": "VOICE_CALL",
+      "created_at": "2026-07-21T09:00:00Z",
+      "ai_handoff": true,
+      "handoff_reason": "Necesita una explicación humana sobre documentación ficticia.",
+      "handoff_requested_at": "21/07/2026 09:20",
+      "qualification_data": null,
+      "interactions": [
+        {
+          "id": "demo-interaction-14-a",
+          "channel": "VOICE",
+          "direction": "inbound",
+          "created_at": "2026-07-21T09:15:00Z",
+          "content": "La llamada sintética termina con solicitud de traspaso."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-15",
+      "organization_id": "ORG-DEMO",
+      "full_name": "Luz Conversación WhatsApp",
+      "phone": "+34 100 00 00 15",
+      "email": null,
+      "lead_source": "WHATSAPP",
+      "created_at": "2026-07-22T09:00:00Z",
+      "qualification_data": {},
+      "interactions": [
+        {
+          "id": "demo-interaction-15-a",
+          "channel": "WHATSAPP",
+          "direction": "outbound",
+          "created_at": "2026-07-22T09:05:00Z",
+          "content": "Saludo sintético enviado."
+        },
+        {
+          "id": "demo-interaction-15-b",
+          "channel": "WHATSAPP",
+          "direction": "inbound",
+          "created_at": "2026-07-22T09:06:00Z",
+          "content": "Respuesta sintética recibida."
+        }
+      ]
+    },
+    {
+      "is_test": true,
+      "id": "demo-contact-16-hidden",
+      "organization_id": "ORG-OTHER",
+      "full_name": "Tenant Oculto Sintético",
+      "phone": "+34 100 00 00 01",
+      "email": "aina.compradora@example.invalid",
+      "lead_source": "CRM",
+      "created_at": "2026-07-23T09:00:00Z",
+      "tags": ["no-llamar"],
+      "qualification_data": null,
+      "interactions": []
+    }
+  ]
+}
