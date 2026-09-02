@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f1f0e9;
+  --surface: #fbfaf5;
+  --ink: #18231d;
+  --muted: #5f6b64;
+  --line: #d5d8cf;
+  --accent: #b8f36b;
+  --accent-deep: #315c22;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  font-family: "Avenir Next", Avenir, "Century Gothic", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  color: var(--ink);
+  background: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent-deep);
+  outline-offset: 4px;
+}
+
+.brand-mark {
+  color: var(--ink);
+  font-family: Charter, "Bitstream Charter", "Iowan Old Style", serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-decoration: none;
+}
+
+.brand-mark span {
+  color: var(--accent-deep);
+}
+
+.eyebrow {
+  color: var(--accent-deep);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid #a8b3a5;
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-deep);
+  box-shadow: 0 0 0 4px #d9e9d4;
+}
+
+.preview-panel {
+  align-self: center;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--surface);
+  padding: 1.75rem;
+  box-shadow: 0 24px 70px rgb(37 51 42 / 10%);
+}
+
+.index-badge,
+.item-index {
+  font-variant-numeric: tabular-nums;
+}
+
+.index-badge {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.item-index {
+  color: var(--accent-deep);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
