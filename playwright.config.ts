@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const TEST_PORT = 3100;
+const TEST_URL = `http://127.0.0.1:${TEST_PORT}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: TEST_URL,
     trace: "on-first-retry",
   },
   projects: [
@@ -17,8 +20,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    command: `pnpm dev --port ${TEST_PORT}`,
+    url: TEST_URL,
+    reuseExistingServer: false,
   },
 });

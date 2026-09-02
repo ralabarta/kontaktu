@@ -1,5 +1,5 @@
 const ISO_DATE_PATTERN =
-  /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2}))?$/;
+  /^(\d{4})-(\d{2})-(\d{2})(?:T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2}))?$/;
 const LOCAL_DATE_PATTERN = /^(\d{2})\/(\d{2})\/(\d{4})(?: (\d{2}):(\d{2}))?$/;
 
 export function parseContactDate(value: string | number): Date | null {
@@ -9,8 +9,22 @@ export function parseContactDate(value: string | number): Date | null {
 
   const normalizedValue = value.trim();
 
-  if (ISO_DATE_PATTERN.test(normalizedValue)) {
-    return dateOrNull(Date.parse(normalizedValue));
+  const isoMatch = ISO_DATE_PATTERN.exec(normalizedValue);
+
+  if (isoMatch) {
+    const [, yearText, monthText, dayText] = isoMatch;
+    const year = Number(yearText);
+    const monthIndex = Number(monthText) - 1;
+    const day = Number(dayText);
+    const calendarDate = new Date(0);
+    calendarDate.setUTCFullYear(year, monthIndex, day);
+
+    const isExactIsoDate =
+      calendarDate.getUTCFullYear() === year &&
+      calendarDate.getUTCMonth() === monthIndex &&
+      calendarDate.getUTCDate() === day;
+
+    return isExactIsoDate ? dateOrNull(Date.parse(normalizedValue)) : null;
   }
 
   const localMatch = LOCAL_DATE_PATTERN.exec(normalizedValue);

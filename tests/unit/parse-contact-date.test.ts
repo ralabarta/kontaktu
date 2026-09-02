@@ -34,6 +34,10 @@ describe("parseContactDate", () => {
     expect(parseContactDate(0)?.toISOString()).toBe("1970-01-01T00:00:00.000Z");
   });
 
+  it("returns null for a calendar-invalid ISO date", () => {
+    expect(parseContactDate("2026-02-31")).toBeNull();
+  });
+
   it("returns null for an invalid date", () => {
     expect(parseContactDate("31/02/2026")).toBeNull();
   });

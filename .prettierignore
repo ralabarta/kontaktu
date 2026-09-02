@@ -6,6 +6,9 @@ test-results
 pnpm-lock.yaml
 .claude
 .codegraph
+.atl
+.mcp.json
+graphify-out
 .codex
 .config
 .copilot
