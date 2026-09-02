@@ -1,0 +1,169 @@
+import { describe, expect, it } from "vitest";
+import { detectPossibleDuplicates } from "@/features/contacts/application/detect-duplicates";
+import { evaluateContactPolicy } from "@/features/contacts/application/evaluate-contact-policy";
+import { normalizeContact } from "@/features/contacts/application/normalize-contact";
+
+const rawContact = (id: string, overrides: Record<string, unknown> = {}) => ({
+  id,
+  organization_id: "ORG-TEST",
+  full_name: `Synthetic ${id}`,
+  phone: null,
+  email: null,
+  lead_source: "CRM",
+  created_at: "2026-07-08T10:28:00Z",
+  qualification_data: null,
+  interactions: [],
+  ...overrides,
+});
+
+describe("detectPossibleDuplicates", () => {
+  it("finds the c-001/c-009 shape by exact normalized phone with an explainable reason", () => {
+    const original = normalizeContact(
+      rawContact("c-001-shape", { phone: "+34 655 12 34 56" }),
+    );
+    const duplicate = normalizeContact(
+      rawContact("c-009-shape", { phone: "655123456" }),
+    );
+
+    expect(detectPossibleDuplicates(original, [original, duplicate])).toEqual([
+      {
+        contactId: "c-009-shape",
+        matchedBy: ["phone"],
+        reason: "Mismo teléfono normalizado: +34 655 123 456",
+      },
+    ]);
+  });
+
+  it("can explain exact phone and actionable email evidence together", () => {
+    const target = normalizeContact(
+      rawContact("target", {
+        phone: "+34 655 12 34 56",
+        email: "PERSON@example.test",
+      }),
+    );
+    const candidate = normalizeContact(
+      rawContact("candidate", {
+        phone: "655123456",
+        email: "person@example.test",
+      }),
+    );
+
+    expect(detectPossibleDuplicates(target, [candidate])[0]?.matchedBy).toEqual(
+      ["phone", "email"],
+    );
+  });
+
+  it("never reports cross-tenant matches", () => {
+    const target = normalizeContact(
+      rawContact("target", { phone: "+34 655 12 34 56" }),
+    );
+    const otherTenant = normalizeContact(
+      rawContact("other-tenant", {
+        organization_id: "ORG-OTHER",
+        phone: "655123456",
+      }),
+    );
+
+    expect(detectPossibleDuplicates(target, [otherTenant])).toEqual([]);
+  });
+
+  it("avoids name-only and invalid-email false positives", () => {
+    const target = normalizeContact(
+      rawContact("target", {
+        full_name: "Same Name",
+        email: "invalid@@example.test",
+      }),
+    );
+    const candidate = normalizeContact(
+      rawContact("candidate", {
+        full_name: "Same Name",
+        email: "invalid@@example.test",
+      }),
+    );
+
+    expect(detectPossibleDuplicates(target, [candidate])).toEqual([]);
+  });
+});
+
+describe("evaluateContactPolicy", () => {
+  it("blocks incompatible actions and permits valid email for a c-013 no-call/email-only shape", () => {
+    const policy = evaluateContactPolicy(
+      normalizeContact(
+        rawContact("c-013-shape", {
+          phone: "+34 644 78 12 90",
+          email: "person@example.test",
+          tags: ["no-llamar"],
+          notes: "Contactar SOLO por email.",
+          interactions: [
+            {
+              id: "email-request",
+              channel: "EMAIL",
+              created_at: "2026-07-06T09:00:00Z",
+              content: "Please contact by email only.",
+            },
+          ],
+        }),
+      ),
+    );
+
+    expect(policy.status).toBe("restricted");
+    expect(policy.actions.call).toEqual({
+      status: "blocked",
+      allowed: false,
+      reason: "El contacto ha pedido no recibir llamadas.",
+    });
+    expect(policy.actions.email.status).toBe("allowed");
+    expect(policy.actions.email.allowed).toBe(true);
+    expect(policy.actions.whatsapp.status).toBe("blocked");
+  });
+
+  it("returns unknown and permits nothing when evidence is missing", () => {
+    const policy = evaluateContactPolicy(
+      normalizeContact(rawContact("sparse", { phone: "+34 611 22 33 44" })),
+    );
+
+    expect(policy.status).toBe("unknown");
+    expect(Object.values(policy.actions)).toEqual([
+      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", allowed: false }),
+    ]);
+  });
+
+  it("does not make an invalid email actionable", () => {
+    const policy = evaluateContactPolicy(
+      normalizeContact(
+        rawContact("invalid-email", {
+          email: "person@@example.test",
+          tags: ["no-llamar"],
+          notes: "Contactar solo por email.",
+        }),
+      ),
+    );
+
+    expect(policy.actions.email).toEqual({
+      status: "blocked",
+      allowed: false,
+      reason: "El email disponible no es válido para iniciar una acción.",
+    });
+  });
+});
+
+describe("AI handoff", () => {
+  it("keeps the c-016 handoff reason and date separate from contact policy", () => {
+    const result = normalizeContact(
+      rawContact("c-016-shape", {
+        ai_handoff: true,
+        handoff_reason: "Requested a human agent",
+        handoff_requested_at: "2026-07-13T19:22:00Z",
+      }),
+    );
+
+    expect(result.handoff).toEqual({
+      status: "requested",
+      reason: "Requested a human agent",
+      requestedAt: new Date("2026-07-13T19:22:00Z"),
+    });
+    expect(evaluateContactPolicy(result).status).toBe("unknown");
+  });
+});
