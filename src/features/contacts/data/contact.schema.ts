@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const contactDateSchema = z.union([z.string(), z.number()]);
 
-const interactionSchema = z.looseObject({
+const interactionSchema = z.object({
   id: z.string(),
   channel: z.string().nullish(),
   direction: z.string().nullish(),
@@ -11,7 +11,7 @@ const interactionSchema = z.looseObject({
   metadata: z.unknown().nullish(),
 });
 
-export const rawContactSchema = z.looseObject({
+export const rawContactSchema = z.object({
   id: z.string(),
   organization_id: z.string(),
   full_name: z.string().nullish(),

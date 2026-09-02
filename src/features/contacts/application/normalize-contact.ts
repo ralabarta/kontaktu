@@ -60,7 +60,7 @@ export function normalizeContact(input: unknown): Contact {
       displayName,
       fullName,
       initials: getInitials(displayName),
-      phone: phone && raw.phone ? { raw: raw.phone, ...phone } : null,
+      phone,
       email,
     },
     source: normalizeSource(raw.lead_source),

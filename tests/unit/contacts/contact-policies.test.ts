@@ -3,6 +3,7 @@ import { detectPossibleDuplicates } from "@/features/contacts/application/detect
 import { evaluateContactPolicy } from "@/features/contacts/application/evaluate-contact-policy";
 import { normalizeContact } from "@/features/contacts/application/normalize-contact";
 
+// Spanish subscriber ranges do not start with 0 or 1; test numbers are intentionally impossible.
 const rawContact = (id: string, overrides: Record<string, unknown> = {}) => ({
   id,
   organization_id: "ORG-TEST",
@@ -19,17 +20,17 @@ const rawContact = (id: string, overrides: Record<string, unknown> = {}) => ({
 describe("detectPossibleDuplicates", () => {
   it("finds the c-001/c-009 shape by exact normalized phone with an explainable reason", () => {
     const original = normalizeContact(
-      rawContact("c-001-shape", { phone: "+34 655 12 34 56" }),
+      rawContact("c-001-shape", { phone: "+34 100 00 00 00" }),
     );
     const duplicate = normalizeContact(
-      rawContact("c-009-shape", { phone: "655123456" }),
+      rawContact("c-009-shape", { phone: "100000000" }),
     );
 
     expect(detectPossibleDuplicates(original, [original, duplicate])).toEqual([
       {
         contactId: "c-009-shape",
         matchedBy: ["phone"],
-        reason: "Mismo teléfono normalizado: +34 655 123 456",
+        reason: "Mismo teléfono normalizado: +34 100 000 000",
       },
     ]);
   });
@@ -37,14 +38,14 @@ describe("detectPossibleDuplicates", () => {
   it("can explain exact phone and actionable email evidence together", () => {
     const target = normalizeContact(
       rawContact("target", {
-        phone: "+34 655 12 34 56",
-        email: "PERSON@example.test",
+        phone: "+34 100 00 00 00",
+        email: "PERSON@example.invalid",
       }),
     );
     const candidate = normalizeContact(
       rawContact("candidate", {
-        phone: "655123456",
-        email: "person@example.test",
+        phone: "100000000",
+        email: "person@example.invalid",
       }),
     );
 
@@ -53,14 +54,14 @@ describe("detectPossibleDuplicates", () => {
     );
   });
 
-  it("never reports cross-tenant matches", () => {
+  it("filters cross-tenant evidence but does not authorize repository or API requests", () => {
     const target = normalizeContact(
-      rawContact("target", { phone: "+34 655 12 34 56" }),
+      rawContact("target", { phone: "+34 100 00 00 00" }),
     );
     const otherTenant = normalizeContact(
       rawContact("other-tenant", {
         organization_id: "ORG-OTHER",
-        phone: "655123456",
+        phone: "100000000",
       }),
     );
 
@@ -70,14 +71,14 @@ describe("detectPossibleDuplicates", () => {
   it("avoids name-only and invalid-email false positives", () => {
     const target = normalizeContact(
       rawContact("target", {
-        full_name: "Same Name",
-        email: "invalid@@example.test",
+        full_name: "Synthetic Duplicate Fixture",
+        email: "invalid@@example.invalid",
       }),
     );
     const candidate = normalizeContact(
       rawContact("candidate", {
-        full_name: "Same Name",
-        email: "invalid@@example.test",
+        full_name: "Synthetic Duplicate Fixture",
+        email: "invalid@@example.invalid",
       }),
     );
 
@@ -90,18 +91,10 @@ describe("evaluateContactPolicy", () => {
     const policy = evaluateContactPolicy(
       normalizeContact(
         rawContact("c-013-shape", {
-          phone: "+34 644 78 12 90",
-          email: "person@example.test",
+          phone: "+34 000 44 55 66",
+          email: "person@example.invalid",
           tags: ["no-llamar"],
           notes: "Contactar SOLO por email.",
-          interactions: [
-            {
-              id: "email-request",
-              channel: "EMAIL",
-              created_at: "2026-07-06T09:00:00Z",
-              content: "Please contact by email only.",
-            },
-          ],
         }),
       ),
     );
@@ -119,7 +112,33 @@ describe("evaluateContactPolicy", () => {
 
   it("returns unknown and permits nothing when evidence is missing", () => {
     const policy = evaluateContactPolicy(
-      normalizeContact(rawContact("sparse", { phone: "+34 611 22 33 44" })),
+      normalizeContact(rawContact("sparse", { phone: "+34 000 11 22 33" })),
+    );
+
+    expect(policy.status).toBe("unknown");
+    expect(Object.values(policy.actions)).toEqual([
+      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", allowed: false }),
+    ]);
+  });
+
+  it("does not infer a legal restriction from free-text transcription alone", () => {
+    const policy = evaluateContactPolicy(
+      normalizeContact(
+        rawContact("transcript-only", {
+          interactions: [
+            {
+              id: "synthetic-transcript",
+              channel: "VOICE",
+              metadata: {
+                transcript_excerpt:
+                  "Do not call again; this transcription is untrusted free text.",
+              },
+            },
+          ],
+        }),
+      ),
     );
 
     expect(policy.status).toBe("unknown");
@@ -134,7 +153,7 @@ describe("evaluateContactPolicy", () => {
     const policy = evaluateContactPolicy(
       normalizeContact(
         rawContact("invalid-email", {
-          email: "person@@example.test",
+          email: "person@@example.invalid",
           tags: ["no-llamar"],
           notes: "Contactar solo por email.",
         }),

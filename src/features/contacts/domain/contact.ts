@@ -49,7 +49,6 @@ export interface ContactIdentity {
   fullName: string | null;
   initials: string;
   phone: {
-    raw: string;
     display: string;
     comparable: string;
   } | null;

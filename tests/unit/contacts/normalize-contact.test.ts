@@ -8,12 +8,13 @@ import {
   resolveFactPrecedence,
 } from "@/features/contacts/application/normalize-contact";
 
+// Spanish subscriber ranges do not start with 0 or 1; test numbers are intentionally impossible.
 const contact = (overrides: Record<string, unknown> = {}) => ({
   id: "synthetic-contact",
   organization_id: "ORG-TEST",
-  full_name: "Sample Contact",
-  phone: "+34 655 12 34 56",
-  email: "sample@example.test",
+  full_name: "Synthetic Fixture Contact",
+  phone: "+34 100 00 00 00",
+  email: "sample@example.invalid",
   lead_source: "VOICE_CALL",
   created_at: "2026-07-08T10:28:00Z",
   qualification_data: null,
@@ -22,18 +23,34 @@ const contact = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("rawContactSchema", () => {
-  it("accepts the observed heterogeneous boundary without exposing it as domain data", () => {
-    const parsed = rawContactSchema.safeParse(
-      contact({
-        full_name: null,
-        created_at: 1782259200,
-        qualification_data:
-          '{"qualification":{"rental":{"budget":{"value":1400,"source":"explicit"}}}}',
-        unknown_upstream_field: { retainedAtBoundary: true },
-      }),
-    );
+  it("accepts heterogeneous input while stripping unknown keys from every trusted boundary", () => {
+    const sentinel = "__UNTRUSTED_SENTINEL__";
+    const input = contact({
+      full_name: null,
+      created_at: 1782259200,
+      qualification_data:
+        '{"qualification":{"rental":{"budget":{"value":1400,"source":"explicit"}}}}',
+      interactions: [
+        {
+          id: "synthetic-interaction",
+          channel: "EMAIL",
+          unknown_interaction_field: sentinel,
+        },
+      ],
+      unknown_upstream_field: sentinel,
+    });
 
-    expect(parsed.success).toBe(true);
+    const parsed = rawContactSchema.parse(input);
+    const normalized = normalizeContact(input);
+    const serialized = JSON.stringify(normalized);
+
+    expect(parsed).not.toHaveProperty("unknown_upstream_field");
+    expect(parsed.interactions?.[0]).not.toHaveProperty(
+      "unknown_interaction_field",
+    );
+    expect(normalized).not.toHaveProperty("unknown_upstream_field");
+    expect(serialized).not.toContain(sentinel);
+    expect(serialized).not.toContain('"raw"');
   });
 });
 
@@ -59,15 +76,15 @@ describe("normalizeContact", () => {
 
   it("uses name, phone, email, then a dignified unidentified fallback", () => {
     expect(normalizeContact(contact()).identity.displayName).toBe(
-      "Sample Contact",
+      "Synthetic Fixture Contact",
     );
     expect(
       normalizeContact(contact({ full_name: null })).identity.displayName,
-    ).toBe("+34 655 123 456");
+    ).toBe("+34 100 000 000");
     expect(
       normalizeContact(contact({ full_name: null, phone: null })).identity
         .displayName,
-    ).toBe("sample@example.test");
+    ).toBe("sample@example.invalid");
     expect(
       normalizeContact(contact({ full_name: null, phone: null, email: null }))
         .identity.displayName,
@@ -107,23 +124,23 @@ describe("normalizeContact", () => {
   });
 
   it("normalizes phones for display and exact comparison", () => {
-    expect(normalizePhone("0034655123456")).toEqual({
-      display: "+34 655 123 456",
-      comparable: "34655123456",
+    expect(normalizePhone("0034100000000")).toEqual({
+      display: "+34 100 000 000",
+      comparable: "34100000000",
     });
-    expect(normalizePhone("655123456")).toEqual({
-      display: "+34 655 123 456",
-      comparable: "34655123456",
+    expect(normalizePhone("100000000")).toEqual({
+      display: "+34 100 000 000",
+      comparable: "34100000000",
     });
   });
 
   it("marks invalid email as non-actionable", () => {
-    expect(normalizeEmail("person@example.test")).toEqual({
-      value: "person@example.test",
+    expect(normalizeEmail("person@example.invalid")).toEqual({
+      value: "person@example.invalid",
       actionable: true,
     });
-    expect(normalizeEmail("person@@example.test")).toEqual({
-      value: "person@@example.test",
+    expect(normalizeEmail("person@@example.invalid")).toEqual({
+      value: "person@@example.invalid",
       actionable: false,
     });
   });
@@ -194,6 +211,48 @@ describe("normalizeContact", () => {
     );
   });
 
+  it("keeps a current manual fact effective while prior customer evidence remains only in timeline", () => {
+    const result = normalizeContact(
+      contact({
+        qualification_data: {
+          qualification: {
+            sale: {
+              budget: {
+                value: { max: 350000 },
+                source: "manual",
+                updatedAt: "2026-07-10T09:15:00Z",
+              },
+            },
+          },
+        },
+        interactions: [
+          {
+            id: "synthetic-prior-customer-evidence",
+            channel: "VOICE",
+            direction: "inbound",
+            created_at: "2026-07-09T08:00:00Z",
+            content: "Earlier customer budget was 300000.",
+          },
+        ],
+      }),
+    );
+
+    expect(result.qualification.sale).toEqual([
+      expect.objectContaining({
+        key: "budget",
+        source: "manual",
+        value: { max: 350000 },
+        evidence: [expect.objectContaining({ source: "manual" })],
+      }),
+    ]);
+    expect(result.timeline).toEqual([
+      expect.objectContaining({
+        id: "synthetic-prior-customer-evidence",
+        content: "Earlier customer budget was 300000.",
+      }),
+    ]);
+  });
+
   it("does not invent historical facts for a lone manual value like c-008", () => {
     const result = normalizeContact(
       contact({
@@ -223,14 +282,14 @@ describe("normalizeContact", () => {
       contact({
         id: "c-012-shape",
         full_name: null,
-        phone: "+34611223344",
+        phone: "+34000112233",
         email: null,
         lead_source: null,
         created_at: 1782259200,
       }),
     );
 
-    expect(result.identity.displayName).toBe("+34 611 223 344");
+    expect(result.identity.displayName).toBe("+34 000 112 233");
     expect(result.source).toBe("unknown");
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.timeline).toEqual([]);
