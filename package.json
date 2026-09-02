@@ -15,8 +15,9 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:pii": "node scripts/check-tracked-pii.mjs",
+    "check:privacy": "node scripts/check-public-fixtures.mjs",
     "test": "vitest run",
+    "test:privacy": "node --test tests/unit/scripts/check-public-fixtures.test.mjs",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test"
   },

@@ -1,10 +1,10 @@
 import type { Contact } from "../domain/contact";
 
-export type ContactPolicyStatus = "allowed" | "blocked" | "unknown";
+export type ContactPolicyStatus = "available" | "blocked" | "unknown";
 
 export interface ContactActionPolicy {
   status: ContactPolicyStatus;
-  allowed: boolean;
+  available: boolean;
   reason: string;
 }
 
@@ -19,67 +19,44 @@ export interface ContactPolicy {
 
 const UNKNOWN_EVIDENCE: ContactActionPolicy = {
   status: "unknown",
-  allowed: false,
-  reason: "No hay evidencia suficiente para permitir esta acción.",
+  available: false,
+  reason:
+    "No hay una señal estructurada suficiente; no se infiere permiso desde texto libre.",
 };
 
 export function evaluateContactPolicy(contact: Contact): ContactPolicy {
   const tags = new Set(contact.tags.map((tag) => tag.trim().toLowerCase()));
   const noCall = tags.has("no-llamar");
-  const emailOnly = contact.notes
-    ? /(?:solo|únicamente)\s+por\s+email/i.test(contact.notes)
-    : false;
-
-  if (!noCall && !emailOnly) {
-    return {
-      status: "unknown",
-      actions: {
-        call: { ...UNKNOWN_EVIDENCE },
-        email: { ...UNKNOWN_EVIDENCE },
-        whatsapp: { ...UNKNOWN_EVIDENCE },
-      },
-    };
-  }
 
   return {
-    status: "restricted",
+    status: noCall ? "restricted" : "unknown",
     actions: {
-      call: {
-        status: "blocked",
-        allowed: false,
-        reason: noCall
-          ? "El contacto ha pedido no recibir llamadas."
-          : "El contacto ha indicado que solo desea contacto por email.",
-      },
-      email: emailPolicy(contact, emailOnly),
-      whatsapp: {
-        status: "blocked",
-        allowed: false,
-        reason: emailOnly
-          ? "El contacto ha indicado que solo desea contacto por email."
-          : "No hay evidencia suficiente para permitir WhatsApp.",
-      },
+      call: noCall
+        ? {
+            status: "blocked",
+            available: false,
+            reason: "El tag estructurado no-llamar bloquea las llamadas.",
+          }
+        : { ...UNKNOWN_EVIDENCE },
+      email: emailPolicy(contact),
+      whatsapp: { ...UNKNOWN_EVIDENCE },
     },
   };
 }
 
-function emailPolicy(
-  contact: Contact,
-  emailOnly: boolean,
-): ContactActionPolicy {
+function emailPolicy(contact: Contact): ContactActionPolicy {
   if (contact.identity.email?.actionable !== true) {
     return {
-      status: "blocked",
-      allowed: false,
-      reason: "El email disponible no es válido para iniciar una acción.",
+      status: "unknown",
+      available: false,
+      reason: "No hay un email válido disponible; no se evalúa consentimiento.",
     };
   }
 
-  if (!emailOnly) return { ...UNKNOWN_EVIDENCE };
-
   return {
-    status: "allowed",
-    allowed: true,
-    reason: "El contacto ha indicado que desea contacto únicamente por email.",
+    status: "available",
+    available: true,
+    reason:
+      "Hay un email técnicamente válido; su disponibilidad no acredita consentimiento.",
   };
 }

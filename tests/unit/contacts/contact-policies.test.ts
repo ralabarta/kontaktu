@@ -87,7 +87,7 @@ describe("detectPossibleDuplicates", () => {
 });
 
 describe("evaluateContactPolicy", () => {
-  it("blocks incompatible actions and permits valid email for a c-013 no-call/email-only shape", () => {
+  it("blocks calls from the canonical tag and keeps valid email technically available", () => {
     const policy = evaluateContactPolicy(
       normalizeContact(
         rawContact("c-013-shape", {
@@ -102,12 +102,18 @@ describe("evaluateContactPolicy", () => {
     expect(policy.status).toBe("restricted");
     expect(policy.actions.call).toEqual({
       status: "blocked",
-      allowed: false,
-      reason: "El contacto ha pedido no recibir llamadas.",
+      available: false,
+      reason: "El tag estructurado no-llamar bloquea las llamadas.",
     });
-    expect(policy.actions.email.status).toBe("allowed");
-    expect(policy.actions.email.allowed).toBe(true);
-    expect(policy.actions.whatsapp.status).toBe("blocked");
+    expect(policy.actions.email).toEqual({
+      status: "available",
+      available: true,
+      reason:
+        "Hay un email técnicamente válido; su disponibilidad no acredita consentimiento.",
+    });
+    expect(policy.actions.whatsapp).toEqual(
+      expect.objectContaining({ status: "unknown", available: false }),
+    );
   });
 
   it("returns unknown and permits nothing when evidence is missing", () => {
@@ -117,9 +123,26 @@ describe("evaluateContactPolicy", () => {
 
     expect(policy.status).toBe("unknown");
     expect(Object.values(policy.actions)).toEqual([
-      expect.objectContaining({ status: "unknown", allowed: false }),
-      expect.objectContaining({ status: "unknown", allowed: false }),
-      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+    ]);
+  });
+
+  it("ignores note-only contact instructions without structured policy evidence", () => {
+    const policy = evaluateContactPolicy(
+      normalizeContact(
+        rawContact("note-only", {
+          notes: "Contactar solo por email; no llamar.",
+        }),
+      ),
+    );
+
+    expect(policy.status).toBe("unknown");
+    expect(Object.values(policy.actions)).toEqual([
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
     ]);
   });
 
@@ -143,13 +166,13 @@ describe("evaluateContactPolicy", () => {
 
     expect(policy.status).toBe("unknown");
     expect(Object.values(policy.actions)).toEqual([
-      expect.objectContaining({ status: "unknown", allowed: false }),
-      expect.objectContaining({ status: "unknown", allowed: false }),
-      expect.objectContaining({ status: "unknown", allowed: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
+      expect.objectContaining({ status: "unknown", available: false }),
     ]);
   });
 
-  it("does not make an invalid email actionable", () => {
+  it("treats an invalid email as unavailable without deciding consent", () => {
     const policy = evaluateContactPolicy(
       normalizeContact(
         rawContact("invalid-email", {
@@ -161,9 +184,9 @@ describe("evaluateContactPolicy", () => {
     );
 
     expect(policy.actions.email).toEqual({
-      status: "blocked",
-      allowed: false,
-      reason: "El email disponible no es válido para iniciar una acción.",
+      status: "unknown",
+      available: false,
+      reason: "No hay un email válido disponible; no se evalúa consentimiento.",
     });
   });
 });
