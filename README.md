@@ -1,5 +1,13 @@
 # Contact intelligence that stays trustworthy when the data does not
 
+[![CI](https://github.com/ralabarta/kontaktu/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/ralabarta/kontaktu/actions/workflows/ci.yml)
+![Next.js 16.3.4](https://img.shields.io/badge/Next.js-16.3.4-000000?logo=nextdotjs&logoColor=white)
+![React 19.2.8](https://img.shields.io/badge/React-19.2.8-087EA4?logo=react&logoColor=white)
+![TypeScript 5.9.3](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript&logoColor=white)
+![pnpm 10.33.0](https://img.shields.io/badge/pnpm-10.33.0-F69220?logo=pnpm&logoColor=white)
+![Coverage 91.12%](https://img.shields.io/badge/coverage-91.12%25-2E7D32)
+![Accessibility tested with axe](https://img.shields.io/badge/accessibility-axe--tested-2E7D32)
+
 Kontaktu is a reviewer-ready contact workspace for an AI-first real-estate CRM. It turns heterogeneous voice, WhatsApp, web, CRM, Meta, and manual records into a useful contact detail without hiding uncertainty, inventing consent, or assuming tomorrow's qualification fields are known today.
 
 The detail—not the auxiliary list—is the product. Open a contact and an agent can understand identity, qualification provenance, interaction history, call restrictions, and the next human context in seconds.
