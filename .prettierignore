@@ -22,3 +22,5 @@ SOUL.md
 contactos.json
 kb-propiedades-voz.json
 tech-spec-ficha-contactos.*
+docs/diagrams/*.html
+docs/diagrams/*.svg

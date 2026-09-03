@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UI component map</title><style>*{box-sizing:border-box}body{margin:0;background:#eeefe8;color:#17231d;font-family:'Avenir Next',Avenir,'Century Gothic',sans-serif}main{width:min(100%,1040px);margin:auto;padding:32px}.eyebrow{margin:0;color:#285a32;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}h1{margin:8px 0 4px;font:700 28px Charter,'Bitstream Charter','Iowan Old Style',serif;letter-spacing:-.03em}p{margin:0 0 20px;color:#5a665f;font-size:14px}svg{display:block;width:100%;height:auto}.node{fill:#fffef9;stroke:#17231d;stroke-width:1}.soft{fill:#f6f6ef;stroke:#a9b2aa;stroke-width:1}.focal{fill:#e7f8cc;stroke:#285a32;stroke-width:2}.zone{fill:rgba(255,254,249,.45);stroke:#a9b2aa;stroke-width:1;stroke-dasharray:4 4}.name{fill:#17231d;font-size:12px;font-weight:700;text-anchor:middle}.sub{fill:#5a665f;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;text-anchor:middle}.tag{fill:#285a32;font:8px ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700;letter-spacing:.08em}.label{fill:#5a665f;font:8px ui-monospace,SFMono-Regular,Consolas,monospace;text-anchor:middle}.edge{fill:none;stroke:#5a665f;stroke-width:1.5}.edge-accent{fill:none;stroke:#285a32;stroke-width:2}.edge-dash{fill:none;stroke:#5a665f;stroke-width:1.5;stroke-dasharray:5 4}.legend{fill:#5a665f;font:8px ui-monospace,SFMono-Regular,Consolas,monospace}@media print{main{padding:0}}</style></head>
+<body><main><p class="eyebrow">Kontaktu · system evidence</p><h1>UI component map</h1><p>The page routes provide identity, ContactWorkspace owns request and view state, and presentational list/detail components render navigation, evidence, and timeline disclosures.</p><svg viewBox="0 0 960 600" role="img" aria-labelledby="components-title components-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="components-title">UI component map</title>
+<desc id="components-desc">The page routes provide identity, ContactWorkspace owns request and view state, and presentational list/detail components render navigation, evidence, and timeline disclosures.</desc>
+<defs><marker id="components-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#5a665f"/></marker><marker id="components-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#285a32"/></marker><marker id="components-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#17364b"/></marker></defs>
+<rect width="960" height="600" fill="#eeefe8"/>
+<text class="tag" x="56" y="64">REACT COMPONENT OWNERSHIP</text>
+<line class="edge-accent" x1="480" y1="144" x2="480" y2="208" marker-end="url(#components-arrow-accent)"/>
+<path class="edge" d="M440 272V296Q440 304 432 304H280Q272 304 272 312V352" marker-end="url(#components-arrow)"/>
+<path class="edge" d="M520 272V296Q520 304 528 304H680Q688 304 688 312V352" marker-end="url(#components-arrow)"/>
+<line class="edge" x1="688" y1="416" x2="688" y2="464" marker-end="url(#components-arrow)"/>
+<rect class="node" x="360" y="80" width="240" height="64" rx="8"/>
+<text class="name" x="480" y="112">Page routes</text>
+<text class="sub" x="480" y="128">initialContactId</text>
+<rect class="focal" x="336" y="208" width="288" height="64" rx="8"/>
+<text class="name" x="480" y="240">ContactWorkspace</text>
+<text class="sub" x="480" y="256">fetch lifecycle + view state</text>
+<rect class="node" x="152" y="352" width="240" height="64" rx="8"/>
+<text class="name" x="272" y="384">ContactList</text>
+<text class="sub" x="272" y="400">navigation + filters</text>
+<rect class="node" x="568" y="352" width="240" height="64" rx="8"/>
+<text class="name" x="688" y="384">ContactDetail</text>
+<text class="sub" x="688" y="400">identity + story sections</text>
+<rect class="soft" x="568" y="464" width="240" height="48" rx="8"/>
+<text class="name" x="688" y="488">Fact + timeline views</text>
+<text class="sub" x="688" y="504">disclosure + provenance</text>
+<line x1="40" y1="552" x2="920" y2="552" stroke="#a9b2aa"/>
+<text class="legend" x="40" y="576">PATTERN · CONTAINER–PRESENTATIONAL OWNERSHIP  |  STATIC · OFFLINE-SAFE  |  SOURCE · CURRENT REPOSITORY</text>
+</svg></main></body>
+</html>
