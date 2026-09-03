@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { GET as getContacts } from "@/app/api/contacts/route";
 import { GET as getContact } from "@/app/api/contacts/[id]/route";
 
-const request = (path: string) => new Request(`http://localhost${path}`);
+const request = (path: string) =>
+  new Request(new URL(path, "https://example.invalid"));
 
 async function json(response: Response): Promise<unknown> {
   return response.json();

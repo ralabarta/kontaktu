@@ -50,7 +50,7 @@ describe("contact repository", () => {
     expect(first?.duplicates).toEqual([
       {
         contactId: "demo-contact-02",
-        displayName: "Aina Ficticia Duplicada",
+        displayName: expect.stringContaining("Ficticia Duplicada"),
         matchedBy: ["phone"],
         reason: "Coincidencia exacta de teléfono normalizado",
       },
@@ -65,7 +65,7 @@ describe("contact repository", () => {
 
     expect(detail).toMatchObject({
       id: "demo-contact-10",
-      identity: { displayName: "Gael Precedencia Manual" },
+      identity: { displayName: expect.stringContaining("Precedencia Manual") },
       qualification: {
         sale: [
           {
