@@ -196,8 +196,9 @@ Concrete mistakes caught by tests and review:
 3. **TypeScript assertions were mistaken for runtime safety.** Malformed HTTP `200` payloads could cross the client boundary until shared Zod parsing was added.
 4. **List completion controlled detail loading.** A direct detail URL waited for the list and could be overwritten by stale responses.
 5. **Runtime locale was mistaken for product timezone.** The same timestamp rendered different dates under UTC and New York until formatting was centralized on Madrid.
+6. **Generated framework types masked a clean-checkout failure.** The dynamic route depended on a `.next`-generated global `PageProps`; remote CI exposed it, and the route now declares its input contract explicitly.
 
-The lesson is operational: generated code is a hypothesis; contracts, race tests, timezone tests, browser checks, and human inspection decide whether it is true.
+The lesson is operational: generated code is a hypothesis; contracts, race tests, timezone tests, clean-checkout CI, browser checks, and human inspection decide whether it is true.
 
 ## Tradeoffs
 
