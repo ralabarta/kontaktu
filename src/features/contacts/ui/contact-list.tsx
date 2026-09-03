@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatContactListDate } from "@/lib/dates/format-contact-date";
 import type { ContactListItemDto } from "../application/contact.dto";
 
 export interface ContactListProps {
@@ -72,7 +73,7 @@ export function ContactList({ contacts, selectedId }: ContactListProps) {
                       ? channelLabels[interaction.channel]
                       : "Sin actividad"}
                     <span aria-hidden="true">·</span>
-                    {formatDate(interaction?.occurredAt ?? null)}
+                    {formatContactListDate(interaction?.occurredAt ?? null)}
                   </span>
                 </span>
                 <svg
@@ -89,12 +90,4 @@ export function ContactList({ contacts, selectedId }: ContactListProps) {
       </ol>
     </nav>
   );
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "Fecha pendiente";
-  return new Intl.DateTimeFormat("es-ES", {
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
 }

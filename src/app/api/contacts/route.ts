@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { contactListSuccessSchema } from "@/features/contacts/application/contact-api.schema";
 import { listContacts } from "@/features/contacts/data/contact.repository";
 
 export const dynamic = "force-dynamic";
@@ -35,17 +36,15 @@ export async function GET(request: Request): Promise<NextResponse> {
     if (!parsed.success) return invalidRequest();
 
     const data = listContacts(parsed.data);
-    return NextResponse.json(
-      {
-        data,
-        meta: {
-          count: data.length,
-          ...(parsed.data.q ? { query: parsed.data.q } : {}),
-          ...(parsed.data.source ? { source: parsed.data.source } : {}),
-        },
+    const response = contactListSuccessSchema.parse({
+      data,
+      meta: {
+        count: data.length,
+        ...(parsed.data.q ? { query: parsed.data.q } : {}),
+        ...(parsed.data.source ? { source: parsed.data.source } : {}),
       },
-      { headers: NO_STORE_HEADERS },
-    );
+    });
+    return NextResponse.json(response, { headers: NO_STORE_HEADERS });
   } catch {
     return NextResponse.json(
       {

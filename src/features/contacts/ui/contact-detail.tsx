@@ -1,4 +1,8 @@
 import Link from "next/link";
+import {
+  formatContactDate,
+  formatContactDateTime,
+} from "@/lib/dates/format-contact-date";
 import type {
   ContactDetailDto,
   QualificationFactDto,
@@ -70,7 +74,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
               <span className={`source-badge source-badge--${contact.source}`}>
                 {sourceLabels[contact.source]}
               </span>
-              <span>Alta {formatDate(contact.createdAt)}</span>
+              <span>Alta {formatContactDate(contact.createdAt)}</span>
             </div>
             <h1 id="contact-name">{contact.identity.displayName}</h1>
             <div className="identity-card__channels">
@@ -151,7 +155,7 @@ export function ContactDetail({ contact }: ContactDetailProps) {
             <h2 id="handoff-title">Traspaso humano</h2>
             <p>{contact.handoff.reason ?? "Sin motivo registrado."}</p>
             <p className="supporting-text">
-              Solicitado {formatDate(contact.handoff.requestedAt)}
+              Solicitado {formatContactDate(contact.handoff.requestedAt)}
             </p>
           </div>
         </section>
@@ -298,7 +302,8 @@ function FactGroup({
             <dd>
               <strong>{formatValue(fact.value)}</strong>
               <span className="fact-provenance">
-                {factSourceLabels[fact.source]} · {formatDate(fact.occurredAt)}
+                {factSourceLabels[fact.source]} ·{" "}
+                {formatContactDate(fact.occurredAt)}
               </span>
               {fact.evidence.length > 1 ? (
                 <details className="evidence-disclosure">
@@ -307,11 +312,11 @@ function FactGroup({
                     {fact.evidence.map((evidence, index) => (
                       <li key={`${fact.key}-${index}`}>
                         <span>
-                          {index === fact.evidence.length - 1
+                          {evidence.isCurrent
                             ? "Valor vigente"
                             : "Evidencia anterior"}{" "}
                           · {factSourceLabels[evidence.source]} ·{" "}
-                          {formatDate(evidence.occurredAt)}
+                          {formatContactDate(evidence.occurredAt)}
                         </span>
                         <strong>{formatValue(evidence.value)}</strong>
                       </li>
@@ -337,8 +342,8 @@ function TimelineItem({ item }: { item: TimelineItemDto }) {
       <div className="timeline-item__body">
         <div className="timeline-item__meta">
           <strong>{channelLabels[item.channel]}</strong>
-          <span>{formatDateTime(item.occurredAt)}</span>
-          {item.durationSeconds ? (
+          <span>{formatContactDateTime(item.occurredAt)}</span>
+          {item.durationSeconds !== null ? (
             <span>{formatDuration(item.durationSeconds)}</span>
           ) : null}
         </div>
@@ -380,26 +385,9 @@ function humanizeKey(key: string): string {
   return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Dato";
 }
 
-function formatDate(value: string | null): string {
-  if (!value) return "fecha pendiente";
-  return new Intl.DateTimeFormat("es-ES", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
-}
-
-function formatDateTime(value: string | null): string {
-  if (!value) return "Fecha pendiente";
-  return new Intl.DateTimeFormat("es-ES", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
-
 function formatDuration(seconds: number): string {
+  if (seconds === 0) return "0 s";
+
   const minutes = Math.floor(seconds / 60);
   return `${minutes} min ${seconds % 60} s`;
 }

@@ -1,11 +1,13 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import type {
-  ContactDetailDto,
-  ContactListItemDto,
-} from "../application/contact.dto";
+import {
+  contactDetailSuccessSchema,
+  contactListSuccessSchema,
+  type ContactDetailDto,
+  type ContactListItemDto,
+} from "../application/contact-api.schema";
 import { ContactDetail } from "./contact-detail";
 import { ContactList } from "./contact-list";
 
@@ -14,10 +16,9 @@ interface ContactWorkspaceProps {
 }
 
 type DetailState =
-  | { status: "idle" | "loading" }
-  | { status: "ready"; contact: ContactDetailDto }
-  | { status: "not-found" }
-  | { status: "error" };
+  | { status: "idle" }
+  | { status: "ready"; detailId: string; contact: ContactDetailDto }
+  | { status: "not-found" | "error"; detailId: string };
 
 export function ContactWorkspace({ initialContactId }: ContactWorkspaceProps) {
   const [contacts, setContacts] = useState<ContactListItemDto[] | null>(null);
@@ -29,31 +30,13 @@ export function ContactWorkspace({ initialContactId }: ContactWorkspaceProps) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState("");
   const [filters, setFilters] = useState({ query: "", source: "" });
-  const [retryKey, setRetryKey] = useState(0);
-
-  const loadDetail = useCallback(async (id: string, signal: AbortSignal) => {
-    setDetailState({ status: "loading" });
-    try {
-      const response = await fetch(`/api/contacts/${encodeURIComponent(id)}`, {
-        cache: "no-store",
-        signal,
-      });
-      if (response.status === 404) {
-        setDetailState({ status: "not-found" });
-        return;
-      }
-      if (!response.ok) throw new Error("detail request failed");
-      const payload = (await response.json()) as { data?: ContactDetailDto };
-      if (!payload.data) throw new Error("invalid detail response");
-      setDetailState({ status: "ready", contact: payload.data });
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      setDetailState({ status: "error" });
-    }
-  }, []);
+  const [listRetryKey, setListRetryKey] = useState(0);
+  const [detailRetryKey, setDetailRetryKey] = useState(0);
+  const detailId = initialContactId ?? selectedId;
 
   useEffect(() => {
     const controller = new AbortController();
+    let isCurrent = true;
     const searchParams = new URLSearchParams();
     if (filters.query) searchParams.set("q", filters.query);
     if (filters.source) searchParams.set("source", filters.source);
@@ -65,42 +48,82 @@ export function ContactWorkspace({ initialContactId }: ContactWorkspaceProps) {
     })
       .then(async (response) => {
         if (!response.ok) throw new Error("list request failed");
-        const payload = (await response.json()) as {
-          data?: ContactListItemDto[];
-        };
-        if (!Array.isArray(payload.data))
-          throw new Error("invalid list response");
+        const payload = contactListSuccessSchema.parse(await response.json());
+        if (!isCurrent) return;
         setListError(false);
         setContacts(payload.data);
-        const targetId = initialContactId ?? payload.data[0]?.id;
-        setSelectedId(targetId ?? null);
-        if (targetId) await loadDetail(targetId, controller.signal);
-        else setDetailState({ status: "idle" });
+        setSelectedId((currentId) => currentId ?? payload.data[0]?.id ?? null);
       })
       .catch((error: unknown) => {
+        if (!isCurrent) return;
         if (error instanceof DOMException && error.name === "AbortError")
           return;
         setListError(true);
-        setDetailState({ status: "error" });
       });
 
-    return () => controller.abort();
-  }, [filters, initialContactId, loadDetail, retryKey]);
+    return () => {
+      isCurrent = false;
+      controller.abort();
+    };
+  }, [filters, listRetryKey]);
+
+  useEffect(() => {
+    if (!detailId) return;
+
+    const controller = new AbortController();
+    let isCurrent = true;
+
+    fetch(`/api/contacts/${encodeURIComponent(detailId)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (response.status === 404) {
+          if (isCurrent) setDetailState({ status: "not-found", detailId });
+          return;
+        }
+        if (!response.ok) throw new Error("detail request failed");
+        const payload = contactDetailSuccessSchema.parse(await response.json());
+        if (isCurrent)
+          setDetailState({ status: "ready", detailId, contact: payload.data });
+      })
+      .catch((error: unknown) => {
+        if (!isCurrent) return;
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+        setDetailState({ status: "error", detailId });
+      });
+
+    return () => {
+      isCurrent = false;
+      controller.abort();
+    };
+  }, [detailId, detailRetryKey]);
 
   function applyFilters(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setContacts(null);
     setListError(false);
-    setDetailState({ status: "loading" });
+    if (initialContactId === null) setSelectedId(null);
     setFilters({ query: query.trim(), source });
   }
 
-  function retry() {
+  function retryList() {
     setContacts(null);
     setListError(false);
-    setDetailState({ status: "loading" });
-    setRetryKey((value) => value + 1);
+    setListRetryKey((value) => value + 1);
   }
+
+  function retryDetail() {
+    setDetailRetryKey((value) => value + 1);
+  }
+
+  const activeDetailState =
+    detailState.status !== "idle" && detailState.detailId === detailId
+      ? detailState
+      : ({ status: "idle" } satisfies DetailState);
+  const detailFailed =
+    activeDetailState.status === "error" || (listError && !detailId);
 
   return (
     <div
@@ -160,23 +183,26 @@ export function ContactWorkspace({ initialContactId }: ContactWorkspaceProps) {
           <div className="error-state" role="alert">
             <strong>No pudimos cargar los contactos</strong>
             <p>Comprueba la conexión y vuelve a intentarlo.</p>
-            <button type="button" onClick={retry}>
+            <button type="button" onClick={retryList}>
               Reintentar listado
             </button>
           </div>
         ) : contacts === null ? (
           <ListSkeleton />
         ) : (
-          <ContactList contacts={contacts} selectedId={selectedId} />
+          <ContactList
+            contacts={contacts}
+            selectedId={initialContactId ?? selectedId}
+          />
         )}
       </aside>
 
       <main className="workspace-main" id="contenido" tabIndex={-1}>
-        {detailState.status === "ready" ? (
-          <ContactDetail contact={detailState.contact} />
-        ) : detailState.status === "not-found" ? (
+        {activeDetailState.status === "ready" ? (
+          <ContactDetail contact={activeDetailState.contact} />
+        ) : activeDetailState.status === "not-found" ? (
           <DetailNotFound />
-        ) : detailState.status === "error" ? (
+        ) : detailFailed ? (
           <div className="detail-message" role="alert">
             <p className="section-kicker">Error de carga</p>
             <h1>No pudimos abrir esta ficha</h1>
@@ -184,7 +210,7 @@ export function ContactWorkspace({ initialContactId }: ContactWorkspaceProps) {
               Los contactos siguen disponibles. Puedes reintentar sin perder el
               contexto.
             </p>
-            <button type="button" onClick={retry}>
+            <button type="button" onClick={retryDetail}>
               Reintentar ficha
             </button>
           </div>

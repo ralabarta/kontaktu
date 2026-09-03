@@ -1,8 +1,13 @@
 // @vitest-environment node
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { GET as getContacts } from "@/app/api/contacts/route";
 import { GET as getContact } from "@/app/api/contacts/[id]/route";
+import {
+  contactDetailSuccessSchema,
+  contactListSuccessSchema,
+} from "@/features/contacts/application/contact-api.schema";
+import * as contactRepository from "@/features/contacts/data/contact.repository";
 
 const request = (path: string) =>
   new Request(new URL(path, "https://example.invalid"));
@@ -11,6 +16,10 @@ async function json(response: Response): Promise<unknown> {
   return response.json();
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("GET /api/contacts", () => {
   it("returns the minimal list envelope with no-store semantics", async () => {
     const response = await getContacts(request("/api/contacts"));
@@ -18,6 +27,7 @@ describe("GET /api/contacts", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(contactListSuccessSchema.parse(body)).toEqual(body);
     expect(body).toMatchObject({
       data: expect.arrayContaining([
         expect.objectContaining({
@@ -32,6 +42,22 @@ describe("GET /api/contacts", () => {
     expect(JSON.stringify(body)).not.toMatch(
       /organizationId|organization_id|qualification_data|comparable|tags|notes/,
     );
+  });
+
+  it("rejects a malformed list success envelope as a controlled API error", async () => {
+    vi.spyOn(contactRepository, "listContacts").mockReturnValue([
+      { id: "unsafe-contact", source: "telegram" },
+    ] as never);
+
+    const response = await getContacts(request("/api/contacts"));
+
+    expect(response.status).toBe(500);
+    expect(await json(response)).toEqual({
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "No se pudo completar la solicitud.",
+      },
+    });
   });
 
   it.each([
@@ -71,6 +97,7 @@ describe("GET /api/contacts/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(contactDetailSuccessSchema.parse(body)).toEqual(body);
     expect(body).toMatchObject({
       data: {
         id: "demo-contact-10",
@@ -83,6 +110,26 @@ describe("GET /api/contacts/[id]", () => {
         duplicates: expect.any(Array),
       },
       meta: { found: true },
+    });
+  });
+
+  it("rejects a malformed detail success envelope as a controlled API error", async () => {
+    vi.spyOn(contactRepository, "getContactById").mockReturnValue({
+      id: "unsafe-contact",
+      timeline: [{ durationSeconds: Number.POSITIVE_INFINITY }],
+    } as never);
+
+    const response = await getContact(
+      request("/api/contacts/unsafe-contact"),
+      routeContext("unsafe-contact"),
+    );
+
+    expect(response.status).toBe(500);
+    expect(await json(response)).toEqual({
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "No se pudo completar la solicitud.",
+      },
     });
   });
 

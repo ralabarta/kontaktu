@@ -3,7 +3,10 @@ import {
   evaluateContactPolicy,
   type ContactPolicy,
 } from "./evaluate-contact-policy";
-import { formatQualificationValue } from "./normalize-contact";
+import {
+  formatQualificationValue,
+  resolveFactPrecedence,
+} from "./normalize-contact";
 import type {
   Contact,
   ContactTimelineItem,
@@ -27,9 +30,13 @@ export interface FactEvidenceDto {
   value: RenderableValue;
   source: FactEvidence["source"];
   occurredAt: string | null;
+  isCurrent: boolean;
 }
 
-export interface QualificationFactDto extends FactEvidenceDto {
+export interface QualificationFactDto extends Omit<
+  FactEvidenceDto,
+  "isCurrent"
+> {
   key: string;
   evidence: FactEvidenceDto[];
 }
@@ -161,20 +168,28 @@ function mapQualification(
 }
 
 function toQualificationFactDto(fact: QualificationFact): QualificationFactDto {
+  const currentEvidence = resolveFactPrecedence(fact.evidence);
+
   return {
     key: fact.key,
     value: fact.value,
     source: fact.source,
     occurredAt: toIso(fact.occurredAt),
-    evidence: fact.evidence.map(toFactEvidenceDto),
+    evidence: fact.evidence.map((evidence) =>
+      toFactEvidenceDto(evidence, evidence === currentEvidence),
+    ),
   };
 }
 
-function toFactEvidenceDto(evidence: FactEvidence): FactEvidenceDto {
+function toFactEvidenceDto(
+  evidence: FactEvidence,
+  isCurrent: boolean,
+): FactEvidenceDto {
   return {
     value: evidence.value,
     source: evidence.source,
     occurredAt: toIso(evidence.occurredAt),
+    isCurrent,
   };
 }
 

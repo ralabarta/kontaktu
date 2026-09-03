@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { contactDetailSuccessSchema } from "@/features/contacts/application/contact-api.schema";
 import { getContactById } from "@/features/contacts/data/contact.repository";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +26,11 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(
-      { data, meta: { found: true } },
-      { headers: NO_STORE_HEADERS },
-    );
+    const response = contactDetailSuccessSchema.parse({
+      data,
+      meta: { found: true },
+    });
+    return NextResponse.json(response, { headers: NO_STORE_HEADERS });
   } catch {
     return NextResponse.json(
       {

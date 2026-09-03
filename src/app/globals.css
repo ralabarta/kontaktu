@@ -582,7 +582,7 @@ a {
 
 .supporting-text {
   margin-top: 0.25rem !important;
-  color: #6b7770 !important;
+  color: var(--muted) !important;
   font-size: 0.73rem !important;
 }
 

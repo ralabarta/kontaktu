@@ -255,7 +255,7 @@ function normalizeInteraction(
     summary: content,
     transcript: cleanText(metadata?.transcript_excerpt),
     durationSeconds:
-      typeof duration === "number" && Number.isFinite(duration)
+      typeof duration === "number" && Number.isFinite(duration) && duration >= 0
         ? duration
         : null,
   };

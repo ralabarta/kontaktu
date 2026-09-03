@@ -174,6 +174,29 @@ describe("normalizeContact", () => {
     expect(formatQualificationValue(["urgent", 2])).toBe("urgent, 2");
   });
 
+  it("keeps zero-second durations and rejects negative durations", () => {
+    const result = normalizeContact(
+      contact({
+        interactions: [
+          {
+            id: "zero-duration",
+            channel: "VOICE",
+            metadata: { duration_sec: 0 },
+          },
+          {
+            id: "negative-duration",
+            channel: "VOICE",
+            metadata: { duration_sec: -1 },
+          },
+        ],
+      }),
+    );
+
+    expect(
+      result.timeline.map(({ durationSeconds }) => durationSeconds),
+    ).toEqual([0, null]);
+  });
+
   it("keeps timeline ordering chronological and stable with invalid dates last", () => {
     const result = normalizeContact(
       contact({
