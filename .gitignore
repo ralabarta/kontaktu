@@ -9,3 +9,26 @@ test-results/
 .env*
 !.env.example
 .DS_Store
+
+# Original challenge distribution files (kept locally, never versioned)
+/contactos.json
+/kb-propiedades-voz.json
+/tech-spec-ficha-contactos.md
+/tech-spec-ficha-contactos.html
+/tech-spec-ficha-contactos.pdf
+
+# Local agent and graph state
+/.atl/
+/.claude/
+/.codegraph/
+/.codex/
+/.config/
+/.copilot/
+/.gemini/
+/.hermes/
+/.mcp.json
+/.openclaw/
+/.pi/
+/.qwen/
+/.gga
+/graphify-out/

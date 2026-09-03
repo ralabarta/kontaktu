@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Independent request flow</title><style>*{box-sizing:border-box}body{margin:0;background:#eeefe8;color:#17231d;font-family:'Avenir Next',Avenir,'Century Gothic',sans-serif}main{width:min(100%,1040px);margin:auto;padding:32px}.eyebrow{margin:0;color:#285a32;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}h1{margin:8px 0 4px;font:700 28px Charter,'Bitstream Charter','Iowan Old Style',serif;letter-spacing:-.03em}p{margin:0 0 20px;color:#5a665f;font-size:14px}svg{display:block;width:100%;height:auto}.node{fill:#fffef9;stroke:#17231d;stroke-width:1}.soft{fill:#f6f6ef;stroke:#a9b2aa;stroke-width:1}.focal{fill:#e7f8cc;stroke:#285a32;stroke-width:2}.zone{fill:rgba(255,254,249,.45);stroke:#a9b2aa;stroke-width:1;stroke-dasharray:4 4}.name{fill:#17231d;font-size:12px;font-weight:700;text-anchor:middle}.sub{fill:#5a665f;font:9px ui-monospace,SFMono-Regular,Consolas,monospace;text-anchor:middle}.tag{fill:#285a32;font:8px ui-monospace,SFMono-Regular,Consolas,monospace;font-weight:700;letter-spacing:.08em}.label{fill:#5a665f;font:8px ui-monospace,SFMono-Regular,Consolas,monospace;text-anchor:middle}.edge{fill:none;stroke:#5a665f;stroke-width:1.5}.edge-accent{fill:none;stroke:#285a32;stroke-width:2}.edge-dash{fill:none;stroke:#5a665f;stroke-width:1.5;stroke-dasharray:5 4}.legend{fill:#5a665f;font:8px ui-monospace,SFMono-Regular,Consolas,monospace}@media print{main{padding:0}}</style></head>
+<body><main><p class="eyebrow">Kontaktu · system evidence</p><h1>Independent request flow</h1><p>A route identity fans out into independent list and detail requests, so direct detail can become usable without waiting for list completion and stale responses cannot commit.</p><svg viewBox="0 0 960 600" role="img" aria-labelledby="request-flow-title request-flow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="request-flow-title">Independent request flow</title>
+<desc id="request-flow-desc">A route identity fans out into independent list and detail requests, so direct detail can become usable without waiting for list completion and stale responses cannot commit.</desc>
+<defs><marker id="request-flow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#5a665f"/></marker><marker id="request-flow-arrow-accent" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#285a32"/></marker><marker id="request-flow-arrow-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#17364b"/></marker></defs>
+<rect width="960" height="600" fill="#eeefe8"/>
+<text class="tag" x="80" y="68">ROOT OR DIRECT DETAIL ROUTE</text>
+<line class="edge-accent" x1="480" y1="120" x2="480" y2="176" marker-end="url(#request-flow-arrow-accent)"/>
+<path class="edge" d="M440 240V264Q440 272 432 272H280Q272 272 272 280V320" marker-end="url(#request-flow-arrow)"/>
+<path class="edge-accent" d="M520 240V264Q520 272 528 272H680Q688 272 688 280V320" marker-end="url(#request-flow-arrow-accent)"/>
+<line class="edge" x1="272" y1="384" x2="272" y2="448" marker-end="url(#request-flow-arrow)"/>
+<line class="edge-accent" x1="688" y1="384" x2="688" y2="448" marker-end="url(#request-flow-arrow-accent)"/>
+<rect class="node" x="360" y="80" width="240" height="40" rx="8"/>
+<text class="name" x="480" y="104">Route identity</text>
+<rect class="focal" x="360" y="176" width="240" height="64" rx="8"/>
+<text class="name" x="480" y="208">Workspace controller</text>
+<text class="sub" x="480" y="224">two independent effects</text>
+<rect class="node" x="152" y="320" width="240" height="64" rx="8"/>
+<text class="name" x="272" y="352">List request</text>
+<text class="sub" x="272" y="368">abort + stale guard</text>
+<rect class="focal" x="568" y="320" width="240" height="64" rx="8"/>
+<text class="name" x="688" y="352">Detail request</text>
+<text class="sub" x="688" y="368">abort + stale guard</text>
+<rect class="node" x="152" y="448" width="240" height="48" rx="8"/>
+<text class="name" x="272" y="472">Auxiliary list state</text>
+<text class="sub" x="272" y="488">loading · error · empty</text>
+<rect class="node" x="568" y="448" width="240" height="48" rx="8"/>
+<text class="name" x="688" y="472">Detail state</text>
+<text class="sub" x="688" y="488">ready · 404 · retry</text>
+<line x1="40" y1="552" x2="920" y2="552" stroke="#a9b2aa"/>
+<text class="legend" x="40" y="576">PATTERN · FAN-OUT WITH ISOLATED LIFECYCLES  |  STATIC · OFFLINE-SAFE  |  SOURCE · CURRENT REPOSITORY</text>
+</svg></main></body>
+</html>

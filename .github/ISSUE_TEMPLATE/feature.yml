@@ -1,0 +1,54 @@
+name: Feature delivery
+about: Propose a reviewed product capability or delivery milestone
+labels:
+  - type:feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a bounded capability with explicit evidence and acceptance criteria.
+  - type: input
+    id: outcome
+    attributes:
+      label: Intended outcome
+      description: Describe the user or reviewer outcome in one sentence.
+      placeholder: A contact agent can understand and safely act on heterogeneous CRM data.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and motivation
+      description: Explain the problem, constraints, and why this scope matters.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List included and explicitly excluded behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Provide observable, verifiable outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Verification evidence
+      description: List the commands, manual checks, and current limitations.
+    validations:
+      required: true
+  - type: checkboxes
+    id: readiness
+    attributes:
+      label: Readiness
+      options:
+        - label: The scope avoids unsupported production claims and protects sensitive data.
+          required: true
+        - label: Acceptance criteria are testable and bounded.
+          required: true
